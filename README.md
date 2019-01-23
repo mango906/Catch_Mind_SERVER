@@ -1,1 +1,2 @@
-# Catch_Mind_SERVER
+# Catch-Mind
+주어진 문제를 그림을 통해 설명을 해 맞추는 형식의 웹 게임
