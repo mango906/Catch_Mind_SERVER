@@ -51,7 +51,10 @@ io.on("connection", socket => {
 
       room.room_master = findName(room_master);
 
-      if (room.room_id === room_id) {
+      console.log(`roomId : ${room.room_id} and disconnect roomId : ${room_id}`);
+
+      if (room.room_id == room_id) {
+        console.log("getRoomInfo submit");
         io.in(room_id).emit("getRoomInfo", room.detail, clients);
       }
 
