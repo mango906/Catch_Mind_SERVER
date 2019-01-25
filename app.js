@@ -142,6 +142,7 @@ io.on("connection", socket => {
       console.log(room);
       if (room.room_id === room_id) {
         io.in(room_id).emit("getRoomInfo", room.detail, clients);
+        io.to(Object.keys(room.detail.sockets)[0]).emit("room_master", "game_start");
       }
     });
     // let room_list = {};
