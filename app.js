@@ -67,12 +67,24 @@ io.on("connection", socket => {
     io.emit("users", clients);
   });
 
+  socket.on("getId", () => {
+    socket.emit("getId", socket.id);
+  });
+
   socket.on("main_chat", chatObject => {
     let chatData = {
       name: findName(chatObject.id),
       content: chatObject.content
     };
     io.emit("main_chat", chatData);
+  });
+
+  socket.on("waiting_chat", chat => {
+    let chatData = {
+      name: findName(chat.id),
+      content: chat.content
+    };
+    io.emit("waiting_chat", chatData);
   });
 
   socket.on("createRoom", (roomName, my_id) => {
