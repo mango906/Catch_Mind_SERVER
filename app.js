@@ -136,16 +136,12 @@ io.on("connection", socket => {
   });
 
   socket.on("chat", chatObject => {
-    let chatData = new Object();
-    clients.forEach(client => {
-      if (client.id === chatObject.id) {
-        chatData.name = client.name;
-        chatData.value = chatObject.value;
-        return;
-      }
-    });
-    chats.push(chatData);
-    io.emit("chat", chats);
+    let chatData = {
+      name: findName(chatObject.id),
+      value: chatObject.value
+    };
+    console.log(chatData);
+    io.emit("chat", chatData);
   });
 
   socket.on("getRoomInfo", room_id => {
@@ -175,6 +171,10 @@ io.on("connection", socket => {
     // // newRoom.room_name = roomName;
     // newRoom.room_master = roomMaster;
     // newRoom.detail = room_list[lastKey];
+  });
+
+  socket.on("game_start", room_id => {
+    io.in(room_id).emit("game_start");
   });
 
   socket.on("initDraw", location => {
