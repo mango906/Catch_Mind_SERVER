@@ -145,11 +145,11 @@ io.on("connection", socket => {
   });
 
   socket.on("getRoomInfo", room_id => {
-    console.log("getRoomInfo Socket " + socket.id);
+    console.log(`getRoomInfo socket : ${socket.id} & room_id : ${room_id}`);
     rooms.forEach(room => {
-      console.log(room);
-      if (room.room_id === room_id) {
-        io.in(room_id).emit("getRoomInfo", room.detail, clients);
+      if (room.room_id == room_id) {
+        console.log("correct rooms");
+        io.in(room_id).emit("getRoomInfo", clients);
         io.to(Object.keys(room.detail.sockets)[0]).emit("room_master", "game_start");
       }
     });
