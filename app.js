@@ -8,6 +8,8 @@ let rooms = [];
 let clients = [];
 let chats = [];
 
+let quiz = ["사과", "바나나"];
+
 app.use(express.static("public"));
 http.listen(4000, function() {
   console.log("server on!");
@@ -113,6 +115,7 @@ io.on("connection", socket => {
     newRoom.room_name = roomName;
     newRoom.room_master = roomMaster;
     newRoom.detail = room_list[lastKey];
+    newRoom.answer = null;
     rooms.push(newRoom);
 
     console.log(rooms[0].detail.sockets);
@@ -148,6 +151,7 @@ io.on("connection", socket => {
     console.log(`getRoomInfo socket : ${socket.id} & room_id : ${room_id}`);
     rooms.forEach(room => {
       if (room.room_id == room_id) {
+        console.log(room);
         console.log("correct rooms");
         io.in(room_id).emit("getRoomInfo", clients);
         io.to(Object.keys(room.detail.sockets)[0]).emit("room_master", "game_start");
@@ -175,6 +179,12 @@ io.on("connection", socket => {
 
   socket.on("game_start", room_id => {
     io.in(room_id).emit("game_start");
+  });
+
+  socket.on("gameInfo", room_id => {
+    let i = findRoom(room_id);
+    rooms[i].answer = "사과";
+    io.to(Object.keys(rooms[i].detail.sockets)[0]).emit("gameInfo", "사과");
   });
 
   socket.on("initDraw", location => {
@@ -217,4 +227,14 @@ function findName(id) {
     }
   });
   return name;
+}
+
+function findRoom(room_id) {
+  let idx;
+  rooms.forEach((room, i) => {
+    if (room.room_id == room_id) {
+      idx = i;
+    }
+  });
+  return idx;
 }
