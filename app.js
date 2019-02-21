@@ -147,6 +147,20 @@ io.on("connection", socket => {
     io.emit("chat", chatData);
   });
 
+  socket.on("drawing_chat", chatObject => {
+    let room_id = chatObject.room_id;
+    let i = findRoom(room_id);
+    if (chatObject.value == rooms[i].answer) {
+      console.log("correct!");
+      return;
+    }
+    let chatData = {
+      name: findName(chatObject.id),
+      value: chatObject.value
+    };
+    console.log(chatData);
+  });
+
   socket.on("getRoomInfo", room_id => {
     console.log(`getRoomInfo socket : ${socket.id} & room_id : ${room_id}`);
     rooms.forEach(room => {
