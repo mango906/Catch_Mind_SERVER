@@ -151,14 +151,20 @@ io.on("connection", socket => {
     let room_id = chatObject.room_id;
     let i = findRoom(room_id);
     if (chatObject.value == rooms[i].answer) {
-      console.log("correct!");
+      let sentence = `[${findName(socket.id)}]님이 정답을 맞추셨습니다! (정답 : ${
+        rooms[i].answer
+      })`;
+      rooms[i].answer = "바나나";
+      io.to(socket.id).emit("gameInfo", "바나나");
+      socket.broadcast.emit("gameInfo", "?");
+      io.in(room_id).emit("correctAnswer", sentence);
       return;
     }
     let chatData = {
       name: findName(chatObject.id),
       value: chatObject.value
     };
-    console.log(chatData);
+    io.in(room_id).emit("drawing_chat", chatData);
   });
 
   socket.on("getRoomInfo", room_id => {
