@@ -116,6 +116,7 @@ io.on("connection", socket => {
     newRoom.room_master = roomMaster;
     newRoom.detail = room_list[lastKey];
     newRoom.answer = null;
+    newRoom.count = 1;
     rooms.push(newRoom);
 
     console.log(rooms[0].detail.sockets);
@@ -155,8 +156,9 @@ io.on("connection", socket => {
         rooms[i].answer
       })`;
       rooms[i].answer = "바나나";
-      io.to(socket.id).emit("gameInfo", "바나나");
-      socket.broadcast.emit("gameInfo", "?");
+      rooms[i].count++;
+      io.to(socket.id).emit("gameInfo", "바나나", rooms[i].count);
+      socket.broadcast.emit("gameInfo", "?", rooms[i].count);
       io.in(room_id).emit("correctAnswer", sentence);
       return;
     }
@@ -204,7 +206,11 @@ io.on("connection", socket => {
   socket.on("gameInfo", room_id => {
     let i = findRoom(room_id);
     rooms[i].answer = "사과";
-    io.to(Object.keys(rooms[i].detail.sockets)[0]).emit("gameInfo", "사과");
+    io.to(Object.keys(rooms[i].detail.sockets)[0]).emit(
+      "gameInfo",
+      rooms[i].answer,
+      rooms[i].count
+    );
   });
 
   socket.on("initDraw", location => {
