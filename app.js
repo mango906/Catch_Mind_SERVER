@@ -205,12 +205,21 @@ io.on("connection", socket => {
 
   socket.on("gameInfo", room_id => {
     let i = findRoom(room_id);
+    let time = 90;
+    if (i == -1) return; // 임시방편
     rooms[i].answer = "사과";
     io.to(Object.keys(rooms[i].detail.sockets)[0]).emit(
       "gameInfo",
       rooms[i].answer,
       rooms[i].count
     );
+
+    const timer = setInterval(() => {
+      io.in(room_id).emit("time", time--);
+      if (time < 0) {
+        clearInterval(timer);
+      }
+    }, 1000);
   });
 
   socket.on("initDraw", location => {
