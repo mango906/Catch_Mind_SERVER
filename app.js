@@ -8,7 +8,30 @@ let rooms = [];
 let clients = [];
 let chats = [];
 
-let quiz = ["사과", "바나나"];
+let quiz = [
+  "사과",
+  "바나나",
+  "김치",
+  "학교",
+  "신발",
+  "컴퓨터",
+  "키보드",
+  "인형",
+  "모자",
+  "아이스크림",
+  "양말",
+  "스피커",
+  "블루투스",
+  "교통카드",
+  "버스",
+  "충전기",
+  "휴대폰",
+  "색연필",
+  "책",
+  "선크림",
+  "화장품",
+  "마이크"
+];
 
 app.use(express.static("public"));
 http.listen(4000, function() {
@@ -151,14 +174,16 @@ io.on("connection", socket => {
   socket.on("drawing_chat", chatObject => {
     let room_id = chatObject.room_id;
     let i = findRoom(room_id);
+    console.log(rooms[i].answer);
     if (chatObject.value == rooms[i].answer) {
       let sentence = `[${findName(socket.id)}]님이 정답을 맞추셨습니다! (정답 : ${
         rooms[i].answer
       })`;
-      rooms[i].answer = "바나나";
+      // returnTime(10);
+      rooms[i].answer = quiz[Math.floor(Math.random() * quiz.length)];
       rooms[i].count++;
-      io.to(socket.id).emit("gameInfo", "바나나", rooms[i].count);
-      socket.broadcast.emit("gameInfo", "?", rooms[i].count);
+      io.to(socket.id).emit("gameInfo", rooms[i].answer, rooms[i].count, true);
+      socket.broadcast.emit("gameInfo", "?", rooms[i].count, false);
       io.in(room_id).emit("correctAnswer", sentence);
       return;
     }
@@ -205,21 +230,35 @@ io.on("connection", socket => {
 
   socket.on("gameInfo", room_id => {
     let i = findRoom(room_id);
-    let time = 90;
+    // let time = 10;
     if (i == -1) return; // 임시방편
-    rooms[i].answer = "사과";
+    rooms[i].answer = quiz[Math.floor(Math.random() * quiz.length)];
     io.to(Object.keys(rooms[i].detail.sockets)[0]).emit(
       "gameInfo",
       rooms[i].answer,
-      rooms[i].count
+      rooms[i].count,
+      true
     );
-
-    const timer = setInterval(() => {
-      io.in(room_id).emit("time", time--);
-      if (time < 0) {
-        clearInterval(timer);
-      }
-    }, 1000);
+    for (let idx = 1; idx < rooms[i].detail.length; idx++) {
+      io.to(Object.keys(rooms[i].detail.sockets)[idx]).emit("gameInfo", "?", rooms[i].count, false);
+    }
+    // returnTime(time);
+    // const timer = setInterval(() => {
+    //   let lastTime = returnTime(time);
+    //   io.in(room_id).emit("time", lastTime);
+    //   if (time < 0) {
+    //     // let randomIdx = Math.floor(Math.random() * rooms[i].detail.length);
+    //     // io.in(room_id).emit("time_over", `시간이 다되었습니다!`);
+    //     // rooms[i].answer = "바나나";
+    //     // io.to(Object.keys(rooms[i].detail.sockets)[randomIdx]).emit(
+    //     //   "gameInfo",
+    //     //   rooms[i].answer,
+    //     //   rooms[i].count,
+    //     //   true
+    //     // );
+    //     clearInterval(timer);
+    //   }
+    // }, 1000);
   });
 
   socket.on("initDraw", location => {
@@ -272,4 +311,26 @@ function findRoom(room_id) {
     }
   });
   return idx;
+}
+
+function returnTime(time) {
+  const timer = setInterval(() => {
+    io.in(room_id).emit("time", time--);
+    if (time < 0) {
+      let i = findRoom(room_id);
+      let randomIdx = Math.floor(Math.random() * rooms[i].detail.length);
+      io.in(room_id).emit("time_over", `시간이 다되었습니다!`);
+      rooms[i].answer = "바나나";
+      rooms[i].count++;
+      io.to(Object.keys(rooms[i].detail.sockets)[randomIdx]).emit(
+        "gameInfo",
+        rooms[i].answer,
+        rooms[i].count,
+        true
+      );
+      clearInterval(timer);
+      time = 10;
+      returnTime(time);
+    }
+  }, 1000);
 }
