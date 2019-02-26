@@ -196,14 +196,15 @@ io.on("connection", socket => {
 
   socket.on("getRoomInfo", room_id => {
     console.log(`getRoomInfo socket : ${socket.id} & room_id : ${room_id}`);
-    rooms.forEach(room => {
-      if (room.room_id == room_id) {
-        console.log(room);
-        console.log("correct rooms");
-        io.in(room_id).emit("getRoomInfo", clients);
-        io.to(Object.keys(room.detail.sockets)[0]).emit("room_master", "game_start");
-      }
-    });
+    let i = findRoom(room_id);
+    let room_member = [];
+    for (let socket in rooms[i].detail.sockets) {
+      room_member.push(findName(socket));
+    }
+    // console.log(rooms[i].detail.sockets);
+    io.in(room_id).emit("getRoomInfo", room_member);
+    io.to(Object.keys(rooms[i].detail.sockets)[0]).emit("room_master", "game_start");
+
     // let room_list = {};
     // let socketRooms = io.sockets.adapter.rooms;
     // Object.keys(socketRooms).map((key, index) => {
